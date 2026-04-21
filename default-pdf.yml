@@ -1,0 +1,41 @@
+---
+site:
+  title: OpenShift 102 Workshop
+  url: "https://example.com"
+  start_page: master@openshift-102:ROOT:index.adoc
+
+content:
+  sources:
+    - url: .
+      start_path: content/openshift-102
+    - url: .
+      start_path: content/bundled/helm-workshop
+    - url: .
+      start_path: content/bundled/deploy-workshop
+    - url: .
+      start_path: content/bundled/istio-workshop
+    - url: .
+      start_path: content/bundled/prometheus-workshop
+
+ui:
+  bundle:
+    url: https://github.com/rhpds/rhdp_showroom_theme/releases/download/v0.0.1/ui-bundle.zip
+    snapshot: true
+  supplemental_files:
+    - path: ./content/openshift-102/supplemental-ui
+    - path: ./content/openshift-102/lib
+    - path: .nojekyll
+    - path: ui.yml
+      contents: "static_files: [ .nojekyll ]"
+
+runtime:
+  cache_dir: ./.cache/antora
+
+antora:
+  extensions:
+    - "@antora/pdf-extension"
+    - require: ./content/openshift-102/lib/dev-mode.js
+      enabled: false
+
+output:
+  dir: ./www

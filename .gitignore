@@ -2,6 +2,7 @@
 node_modules/
 www/
 .cache/
+vendor/bundle/
 .vscode/
 .idea/
 *.log
