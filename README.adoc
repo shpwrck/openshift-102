@@ -85,7 +85,7 @@ helm install my-workshop openshift-102-ghpages/openshift-102-workshop \
   --set image.repository=ghcr.io/OWNER/openshift-102
 ----
 
-The chart version published from `main` is **`0.1.<GitHub Actions run number>`** so each successful workflow produces a fresh index entry. Set `image.repository` / `image.tag` to the GHCR coordinates you run (for example a release tag of the showroom image).
+The chart **version** follows the Git **release tag** when the workflow runs on a **`v*`** tag (for example tag `v1.0.6` yields chart version **`1.0.6`**). Builds on **`main`** between releases use the SemVer from the latest **`v*`** tag on that commit plus **`+ci.<run number>`** (for example **`1.0.6+ci.4821`**) so each Pages deploy gets a distinct chart while staying aligned with the last release line. Set `image.repository` / `image.tag` to your GHCR showroom image (often the same `v*` as the chart when you cut a release).
 
 == Disconnected OpenShift (air-gap)
 
