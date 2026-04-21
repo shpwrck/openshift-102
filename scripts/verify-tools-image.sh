@@ -14,6 +14,7 @@ podman run --rm --entrypoint bash "$img" -c '
   istioctl version --remote=false 2>/dev/null | head -n 6 || istioctl version | head -n 6
   jq --version
   curl --version | head -n 1
+  wget --version | head -n 1
   skopeo --version
   echo "== docker shim (Helm OCI / registry exercises) =="
   docker manifest inspect alpine:latest | head -n 8

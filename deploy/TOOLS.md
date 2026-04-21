@@ -24,7 +24,7 @@ The Deployment keeps one replica running; the image entrypoint sleeps until you 
 | `oc`, `kubectl` | Deploy, Istio, Prometheus (OpenShift flows) |
 | `helm` | Helm workshop |
 | `istioctl` | Istio workshop (version matches Istio **1.23.x** lab text) |
-| `curl`, `jq`, `git`, `gpg` (`gnupg2`) | Prometheus, Helm signing exercises, general scripting |
+| `curl`, `wget`, `jq`, `git`, `gpg` (`gnupg2`) | Prometheus, Helm signing exercises, general scripting |
 | `skopeo` | Registry copy / inspection; raw manifest for the `docker` shim |
 
 ## `docker` compatibility (Helm OCI lab)

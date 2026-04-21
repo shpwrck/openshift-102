@@ -11,7 +11,7 @@ USER 0
 
 RUN dnf install -y \
     ca-certificates tar gzip which procps-ng bind-utils jq git gnupg2 \
-    findutils shadow-utils skopeo bash \
+    findutils shadow-utils skopeo wget bash \
     && dnf clean all
 
 # OpenShift clients (oc + kubectl) — mirror uses openshift-client-linux.tar.gz (amd64) and *-arm64.tar.gz.

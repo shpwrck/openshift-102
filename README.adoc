@@ -19,7 +19,7 @@ Included in that image:
 
 * `oc` and `kubectl` (OpenShift stable client mirror)
 * `helm` (pinned release) and `istioctl` (aligned with the Istio 1.23 workshop)
-* `curl`, `jq`, `git`, GnuPG (`gnupg2`), `skopeo`
+* `curl`, `wget`, `jq`, `git`, GnuPG (`gnupg2`), `skopeo`
 * `/usr/local/bin/docker` — a **shim** only (no Docker Engine): `manifest inspect` uses `skopeo inspect --raw`; `pull` / `image inspect` / `history` use `skopeo` (and `jq` where needed)
 
 Smoke checks: `bash scripts/verify-tools-image.sh IMAGE:TAG` (also run in CI on release). Offline layout and mirroring notes: `deploy/TOOLS.md`.
