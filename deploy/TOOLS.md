@@ -17,7 +17,25 @@ gives every learner the same CLIs **without** installing `oc`, Helm, or other to
 
 The Deployment keeps one replica running; the image entrypoint sleeps until you delete the workload.
 
-If you install the showroom with **Helm** (`deploy/helm/openshift-102-workshop`), the chart can create the same tools workload for you (`tools.enabled`, default **true**) so you do not need a separate paste-only manifest.
+## Helm chart baked into the tools image
+
+At build time, **`Dockerfile.tools`** copies `deploy/helm/openshift-102-workshop` into the image. Inside the pod:
+
+* Path: **`~/chart`** (symlink) or **`/usr/local/share/openshift-102/helm/openshift-102-workshop`**
+* The chart is the **same commit** as the image build (not auto-updated after the image is built).
+
+Example (from a Terminal on the tools pod, after `oc login` / in-cluster credentials work):
+
+```bash
+helm upgrade --install my-showroom ~/chart -n my-namespace --create-namespace \
+  --set image.repository=ghcr.io/OWNER/openshift-102 \
+  --set image.tag=vX.Y.Z \
+  --set tools.enabled=false
+```
+
+Use **`--set tools.enabled=false`** when you are installing **from** the tools pod so the chart does not create a second tools `Deployment`. If you install the chart **elsewhere** (laptop CI, another pod) and want the bundled tools pod too, leave the default **`tools.enabled: true`** in `values.yaml`.
+
+If you install the showroom with **Helm** from a normal workstation, the chart can still create the tools workload for you (`tools.enabled`, default **true**) so you do not need a separate paste-only manifest.
 
 ## Included tools
 

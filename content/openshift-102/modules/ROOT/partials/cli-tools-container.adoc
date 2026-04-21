@@ -6,6 +6,8 @@
 
 If you prefer not to install `oc`, `kubectl`, `helm`, `istioctl`, and related tools on your laptop, run the **workshop CLI tools** image on the cluster. You do **not** need a local `oc` client: apply the manifest from the web console (see below). An interactive `bash` session prints a short list of bundled tools when the shell starts (for example after opening **Terminal** on the pod and running `bash` or `bash -l` if the default shell is `sh`).
 
+The image build copies the **showroom Helm chart** into **`~/chart`** so you can run **`helm upgrade --install`** from the pod without cloning the git repository; use **`--set tools.enabled=false`** when installing from this pod so the chart does not start a second tools `Deployment`.
+
 Default image (change the tag to match your deployed showroom chart or offline bundle):
 
 `{tools-image-basename}:{tools-image-tag}`

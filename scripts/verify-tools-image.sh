@@ -18,5 +18,8 @@ podman run --rm --entrypoint bash "$img" -c '
   skopeo --version
   echo "== docker shim (Helm OCI / registry exercises) =="
   docker manifest inspect alpine:latest | head -n 8
+  echo "== bundled Helm chart =="
+  test -f /workshop/chart/Chart.yaml
+  helm template verify-release /workshop/chart >/dev/null
   echo "== done =="
 '

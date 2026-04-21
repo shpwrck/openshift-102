@@ -48,6 +48,13 @@ RUN set -eux; \
     install -m0755 "/tmp/istio-${ISTIO_VERSION}/bin/istioctl" /usr/local/bin/istioctl; \
     rm -rf "/tmp/istio-${ISTIO_VERSION}"
 
+# Ship the showroom Helm chart inside the image so learners can `helm install` from
+# this container with no git checkout or chart download (air-gap / console-only).
+COPY deploy/helm/openshift-102-workshop /usr/local/share/openshift-102/helm/openshift-102-workshop
+RUN helm lint /usr/local/share/openshift-102/helm/openshift-102-workshop \
+    && chown -R 1001:0 /usr/local/share/openshift-102/helm \
+    && chmod -R g+rX /usr/local/share/openshift-102/helm
+
 COPY image-tools/docker-shim /usr/local/bin/docker
 COPY image-tools/workshop-tools-banner.sh /usr/local/share/openshift-102/workshop-tools-banner.sh
 
@@ -56,6 +63,8 @@ RUN chmod 0755 /usr/local/bin/docker \
 
 RUN useradd -u 1001 -r -g 0 -d /workshop -m -s /bin/bash workshop \
     && mkdir -p /workshop && chown -R 1001:0 /workshop && chmod -R g=u /workshop \
+    && ln -sfn /usr/local/share/openshift-102/helm/openshift-102-workshop /workshop/chart \
+    && chown -h 1001:0 /workshop/chart \
     && printf '\n# OpenShift 102 tools image — show bundled CLIs on interactive bash\n' >>/workshop/.bashrc \
     && printf '. /usr/local/share/openshift-102/workshop-tools-banner.sh\n' >>/workshop/.bashrc \
     && chown 1001:0 /workshop/.bashrc

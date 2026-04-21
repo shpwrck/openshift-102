@@ -21,6 +21,7 @@ Included in that image:
 * `helm` (pinned release) and `istioctl` (aligned with the Istio 1.23 workshop)
 * `curl`, `wget`, `jq`, `git`, GnuPG (`gnupg2`), `skopeo`
 * `/usr/local/bin/docker` — a **shim** only (no Docker Engine): `manifest inspect` uses `skopeo inspect --raw`; `pull` / `image inspect` / `history` use `skopeo` (and `jq` where needed)
+* The **showroom Helm chart** tree at **`~/chart`** (symlink to `/usr/local/share/openshift-102/helm/openshift-102-workshop`), baked in at image build time so you can run **`helm upgrade --install … ~/chart`** from inside the pod without cloning this repo (see `deploy/TOOLS.md`; use **`--set tools.enabled=false`** when installing from this pod to avoid a nested tools `Deployment`).
 
 Smoke checks: `bash scripts/verify-tools-image.sh IMAGE:TAG` (also run in CI on release). Offline layout and mirroring notes: `deploy/TOOLS.md`.
 
