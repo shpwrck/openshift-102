@@ -41,3 +41,8 @@ podman-compose up --build
 == GitHub Pages
 
 The workflow in `.github/workflows/gh-pages.yml` publishes the `www/` output from `antora generate default-site.yml` using the same approach as the upstream workshop repositories.
+
+One-time: turn Pages on for this repository and choose **GitHub Actions** as the build source.
+
+* In the GitHub UI: **Settings** → **Pages** → **Build and deployment** → **Source** → **GitHub Actions**.
+* Or from a machine with the https://cli.github.com/[`gh`] CLI: `gh auth login` then `./scripts/enable-github-pages.sh` (see `scripts/enable-github-pages.sh --help`).
