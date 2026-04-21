@@ -8,6 +8,7 @@ on:
       - ".gitignore"
 
 permissions:
+  contents: read
   pages: write
   id-token: write
 
@@ -22,6 +23,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: recursive
       - name: configure pages
         uses: actions/configure-pages@v5
@@ -36,16 +38,20 @@ jobs:
       - name: antora generate
         run: antora generate default-site.yml --stacktrace
       - name: upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: www
+          include-hidden-files: true
   deploy:
     needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - name: deploy github pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
