@@ -102,17 +102,23 @@ jobs:
       - name: Pull image for SBOM scan
         run: |
           set -euo pipefail
-          docker pull "${{ steps.img.outputs.repository }}@${{ steps.push.outputs.digest }}"
+          REPO="ghcr.io/$(echo -n '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          DIGEST="$(printf '%s' '${{ steps.push.outputs.digest }}' | head -1 | tr -d '\n\r\t ')"
+          test -n "$DIGEST"
+          docker pull "${REPO}@${DIGEST}"
 
       - name: Generate SBOM (CycloneDX) from pushed image
         env:
           TAG: ${{ steps.ver.outputs.tag }}
         run: |
           set -euo pipefail
-          DIGEST='${{ steps.push.outputs.digest }}'
-          REPO='${{ steps.img.outputs.repository }}'
+          REPO="ghcr.io/$(echo -n '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          DIGEST="$(printf '%s' '${{ steps.push.outputs.digest }}' | head -1 | tr -d '\n\r\t ')"
           test -n "$DIGEST"
-          syft scan "docker://${REPO}@${DIGEST}" -o "cyclonedx-json=openshift-102-${TAG}.sbom.cdx.json"
+          IMAGE_REF="${REPO}@${DIGEST}"
+          echo "SBOM scan target: ${IMAGE_REF}"
+          # Plain OCI reference (no docker://). Syft uses registry auth from ~/.docker/config (ghcr login above).
+          syft scan "${IMAGE_REF}" -o "cyclonedx-json=openshift-102-${TAG}.sbom.cdx.json"
           ls -la "openshift-102-${TAG}.sbom.cdx.json"
 
       - name: Helm lint
