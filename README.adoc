@@ -51,6 +51,6 @@ One-time: turn Pages on for this repository and choose **GitHub Actions** as the
 
 * **Helm chart:** `deploy/helm/openshift-102-workshop` — deploys the pre-built static site using the UBI httpd runtime image (see `Dockerfile.runtime`).
 * **SBOM:** CycloneDX JSON is produced in CI for the pushed runtime image (see `.github/workflows/release-offline.yml`).
-* **Release:** Push a SemVer tag `v*` (for example `v1.0.0`) or run the **Release disconnected OpenShift bundle** workflow manually. Each release publishes the Helm package, an offline tarball (`www/` + chart + `DISCONNECTED.md` + `images-mirror.txt`), the SBOM, and pushes the runtime image to `ghcr.io/<owner>/openshift-102:<tag>`.
+* **Release:** Push a SemVer tag `v*` (for example `v1.0.0`) or run the **Release disconnected OpenShift bundle** workflow manually. Each release publishes the Helm package, an offline tarball (`www/` + chart + `DISCONNECTED.md` + `TOOLS.md` + `images-mirror.txt`), SBOMs for the **site** and **CLI tools** images, and pushes `ghcr.io/<owner>/openshift-102:<tag>` (showroom) plus `ghcr.io/<owner>/openshift-102-tools:<tag>` (shared workshop CLIs).
 
-Details: `deploy/DISCONNECTED.md`.
+Details: `deploy/DISCONNECTED.md`, `deploy/TOOLS.md`.

@@ -96,6 +96,27 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
 
+      - name: Build and push workshop CLI tools image
+        id: push_tools
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.tools
+          push: true
+          tags: |
+            ${{ steps.img.outputs.repository }}-tools:${{ steps.ver.outputs.tag }}
+            ${{ steps.img.outputs.repository }}-tools:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Smoke test CLI tools image
+        run: |
+          set -euo pipefail
+          REPO="ghcr.io/$(echo -n '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          TAG='${{ steps.ver.outputs.tag }}'
+          bash scripts/verify-tools-image.sh "${REPO}-tools:${TAG}"
+
       - name: Install Syft
         run: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.19.0
 
@@ -120,6 +141,27 @@ jobs:
           # Plain OCI reference (no docker://). Syft uses registry auth from ~/.docker/config (ghcr login above).
           syft scan "${IMAGE_REF}" -o "cyclonedx-json=openshift-102-${TAG}.sbom.cdx.json"
           ls -la "openshift-102-${TAG}.sbom.cdx.json"
+
+      - name: Pull tools image for SBOM scan
+        run: |
+          set -euo pipefail
+          REPO="ghcr.io/$(echo -n '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          DIGEST="$(printf '%s' '${{ steps.push_tools.outputs.digest }}' | head -1 | tr -d '\n\r\t ')"
+          test -n "$DIGEST"
+          docker pull "${REPO}-tools@${DIGEST}"
+
+      - name: Generate SBOM for CLI tools image
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          REPO="ghcr.io/$(echo -n '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          DIGEST="$(printf '%s' '${{ steps.push_tools.outputs.digest }}' | head -1 | tr -d '\n\r\t ')"
+          test -n "$DIGEST"
+          IMAGE_REF="${REPO}-tools@${DIGEST}"
+          echo "SBOM scan target (tools): ${IMAGE_REF}"
+          syft scan "${IMAGE_REF}" -o "cyclonedx-json=openshift-102-tools-${TAG}.sbom.cdx.json"
+          ls -la "openshift-102-tools-${TAG}.sbom.cdx.json"
 
       - name: Helm lint
         run: helm lint deploy/helm/openshift-102-workshop
@@ -148,12 +190,16 @@ jobs:
           cp -a www/. "${STAGING}/www/"
           cp "${CHART_TGZ}" "${STAGING}/"
           cp deploy/DISCONNECTED.md "${STAGING}/"
+          cp deploy/TOOLS.md "${STAGING}/"
           {
-            echo "# Primary runtime image (required on the cluster)"
+            echo "# Primary runtime image (Antora showroom)"
             echo "${REPO}:${TAG}"
-            echo "# Build-time bases (optional; only if rebuilding the image)"
+            echo "# Workshop CLI tools image (oc, helm, istioctl, kubectl, jq, skopeo, docker shim)"
+            echo "${REPO}-tools:${TAG}"
+            echo "# Build-time bases (optional; only if rebuilding images)"
             echo "docker.io/antora/antora:3.1.7"
             echo "registry.access.redhat.com/ubi9/httpd-24:1-301"
+            echo "registry.access.redhat.com/ubi9/ubi:latest"
           } > "${STAGING}/images-mirror.txt"
           ( cd "${STAGING}" && tar -czf "${BUNDLE}" . )
           ls -la "${BUNDLE}"
@@ -167,6 +213,7 @@ jobs:
           files: |
             ${{ steps.helm.outputs.package }}
             openshift-102-${{ steps.ver.outputs.tag }}.sbom.cdx.json
+            openshift-102-tools-${{ steps.ver.outputs.tag }}.sbom.cdx.json
             openshift-102-offline-${{ steps.ver.outputs.tag }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

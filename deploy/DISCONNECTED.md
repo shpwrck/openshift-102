@@ -10,8 +10,10 @@ as static files under `www/`.
 |----------|---------|
 | `openshift-102-offline-<tag>.tar.gz` | Static `www/` tree, Helm chart `.tgz`, this file, and `images-mirror.txt` |
 | `openshift-102-workshop-<semver>.tgz` | Helm chart package |
-| `openshift-102-<tag>.sbom.cdx.json` | CycloneDX SBOM for the **runtime** image that was pushed to GHCR |
-| Container image on GHCR | Serves the pre-built site (no Antora at runtime) |
+| `openshift-102-<tag>.sbom.cdx.json` | CycloneDX SBOM for the **showroom runtime** image |
+| `openshift-102-tools-<tag>.sbom.cdx.json` | CycloneDX SBOM for the **CLI tools** image (`openshift-102-tools`) |
+| `ghcr.io/<owner>/openshift-102:<tag>` | Serves the pre-built site (no Antora at runtime) |
+| `ghcr.io/<owner>/openshift-102-tools:<tag>` | Shared `oc` / `helm` / `istioctl` / `kubectl` / helpers (see `TOOLS.md`) |
 
 ## 1. Mirror images into your registry
 

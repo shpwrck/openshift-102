@@ -1,0 +1,74 @@
+# Workshop CLI image: CLIs and utilities used across the four bundled workshops.
+# See scripts/verify-tools-image.sh for the smoke checks we run in CI.
+
+FROM registry.access.redhat.com/ubi9/ubi:latest
+
+ARG TARGETARCH=amd64
+ARG HELM_VERSION=3.16.3
+ARG ISTIO_VERSION=1.23.0
+ARG CRANE_VERSION=0.20.3
+
+USER 0
+
+RUN dnf install -y \
+    ca-certificates tar gzip which procps-ng bind-utils jq git gnupg2 \
+    findutils shadow-utils skopeo bash \
+    && dnf clean all
+
+# OpenShift clients (oc + kubectl) — mirror uses openshift-client-linux.tar.gz (amd64) and *-arm64.tar.gz.
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) oc_url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz" ;; \
+      arm64) oc_url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux-arm64.tar.gz" ;; \
+      *) echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
+    esac; \
+    curl -sSL "$oc_url" | tar -xz -C /usr/local/bin oc kubectl; \
+    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl
+
+# Helm
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) helm_arch=amd64 ;; \
+      arm64) helm_arch=arm64 ;; \
+      *) exit 1 ;; \
+    esac; \
+    curl -sSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-${helm_arch}.tar.gz" \
+      | tar -xz -C /tmp; \
+    install -m0755 "/tmp/linux-${helm_arch}/helm" /usr/local/bin/helm; \
+    rm -rf "/tmp/linux-${helm_arch}"
+
+# istioctl (Istio / Service Mesh 1.23 workshop text)
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) istio_arch=amd64 ;; \
+      arm64) istio_arch=arm64 ;; \
+      *) exit 1 ;; \
+    esac; \
+    curl -sSL "https://github.com/istio/istio/releases/download/${ISTIO_VERSION}/istio-${ISTIO_VERSION}-linux-${istio_arch}.tar.gz" \
+      | tar -xz -C /tmp; \
+    install -m0755 "/tmp/istio-${ISTIO_VERSION}/bin/istioctl" /usr/local/bin/istioctl; \
+    rm -rf "/tmp/istio-${ISTIO_VERSION}"
+
+# crane (registry / manifest operations for the docker shim)
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) carch=x86_64 ;; \
+      arm64) carch=arm64 ;; \
+      *) exit 1 ;; \
+    esac; \
+    curl -sSL "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_${carch}.tar.gz" \
+      | tar -xz -C /tmp crane; \
+    install -m0755 /tmp/crane /usr/local/bin/crane; \
+    rm -f /tmp/crane
+
+COPY image-tools/docker-shim /usr/local/bin/docker
+RUN chmod 0755 /usr/local/bin/docker
+
+RUN useradd -u 1001 -r -g 0 -d /workshop -m -s /bin/bash workshop \
+    && mkdir -p /workshop && chown -R 1001:0 /workshop && chmod -R g=u /workshop
+
+ENV HOME=/workshop
+WORKDIR /workshop
+USER 1001
+
+CMD ["bash", "-lc", "exec sleep infinity"]
