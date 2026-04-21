@@ -24,7 +24,7 @@ utilities/lab-serve
 
 Open http://localhost:8080/index.html .
 
-The generated site substitutes default image coordinates for the xref:master@openshift-102:ROOT:cli-tools.adoc[shared CLI tools] callout (`tools-image-basename` / `tools-image-tag` in `default-site.yml`). Point them at your registry when building disconnected documentation, for example:
+The generated site substitutes default image coordinates for the **Shared CLI tools** page in the showroom (`tools-image-basename` / `tools-image-tag` in `default-site.yml`). Point them at your registry when building disconnected documentation, for example:
 
 [source,bash]
 ----
