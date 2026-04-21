@@ -17,6 +17,8 @@ gives every learner the same CLIs **without** installing `oc`, Helm, or other to
 
 The Deployment keeps one replica running; the image entrypoint sleeps until you delete the workload.
 
+If you install the showroom with **Helm** (`deploy/helm/openshift-102-workshop`), the chart can create the same tools workload for you (`tools.enabled`, default **true**) so you do not need a separate paste-only manifest.
+
 ## Included tools
 
 | Tool | Workshops |
