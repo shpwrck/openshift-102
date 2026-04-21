@@ -95,11 +95,13 @@ helm install my-workshop openshift-102-ghpages/openshift-102-workshop \
   --set image.repository=ghcr.io/OWNER/openshift-102
 ----
 
+The chart defaults **`tools.enabled`** to **true**, which starts a second **Deployment** named like **`RELEASE-openshift-102-workshop-tools`** (Helm release name prefix) using **`ghcr.io/OWNER/openshift-102-tools`** with the same tag logic as the showroom image. Disable with **`--set tools.enabled=false`** if you only want the static site.
+
 The chart **version** follows the Git **release tag** when the workflow runs on a **`v*`** tag (for example tag `v1.0.6` yields chart version **`1.0.6`**). Builds on **`main`** between releases use the SemVer from the latest **`v*`** tag on that commit plus **`+ci.<run number>`** (for example **`1.0.6+ci.4821`**) so each Pages deploy gets a distinct chart while staying aligned with the last release line. Set `image.repository` / `image.tag` to your GHCR showroom image (often the same `v*` as the chart when you cut a release).
 
 == Disconnected OpenShift (air-gap)
 
-* **Helm chart:** `deploy/helm/openshift-102-workshop` — deploys the pre-built static site using the UBI httpd runtime image (see `Dockerfile.runtime`).
+* **Helm chart:** `deploy/helm/openshift-102-workshop` — deploys the pre-built static site (UBI httpd runtime, see `Dockerfile.runtime`) and, by default, a **CLI tools** `Deployment` (`tools.enabled`, `Dockerfile.tools`) in the same namespace so learners can use **Terminal** / `oc exec` and run **Helm** from the pod (subject to ServiceAccount RBAC).
 * **SBOM:** CycloneDX JSON is produced in CI for the pushed runtime image (see `.github/workflows/release-offline.yml`).
 * **Release:** Push a SemVer tag `v*` (for example `v1.0.4`) or run the **Release disconnected OpenShift bundle** workflow manually. Each release publishes the Helm package, an offline tarball (`www/` + chart + `DISCONNECTED.md` + `TOOLS.md` + `openshift-102-tools-deployment.yaml` + `images-mirror.txt`), CycloneDX SBOMs for the **showroom** and **CLI tools** images, and pushes `ghcr.io/<owner>/openshift-102:<tag>` and `ghcr.io/<owner>/openshift-102-tools:<tag>`.
 

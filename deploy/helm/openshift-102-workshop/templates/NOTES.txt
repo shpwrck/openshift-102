@@ -10,9 +10,24 @@ OpenShift 102 workshop (static Antora site) has been deployed.
 
 2. Open /index.html for the workshop home.
 
+{{- if .Values.tools.enabled }}
+
+3. CLI tools pod (same namespace) for oc/helm/kubectl in a browser Terminal:
+   oc get pods -l app.kubernetes.io/component=workshop-tools -n {{ .Release.Namespace }}
+   oc exec -it deploy/{{ include "workshop.toolsFullname" . }} -n {{ .Release.Namespace }} -- bash
+
+   Helm inside the cluster uses the pod ServiceAccount. Grant RBAC if installs fail
+   with "forbidden" (for example a Role in this namespace with create on the resources
+   your chart needs), or use a bound token with a user who can install charts.
+
+{{- end }}
+
 For disconnected installs, mirror the container image from the release bundle
 or GHCR into your registry and set:
 
   image.repository / image.tag
+{{- if .Values.tools.enabled }}
+  tools.image.repository / tools.image.tag
+{{- end }}
 
 See DISCONNECTED.md in the offline release archive.

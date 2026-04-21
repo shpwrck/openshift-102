@@ -43,3 +43,22 @@ securityContext:
     drop:
       - ALL
   readOnlyRootFilesystem: false
+
+# Optional CLI tools pod (oc, helm, kubectl, …) in the same release namespace.
+# Use for web console Terminal or in-cluster `helm install` (subject to ServiceAccount RBAC).
+tools:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/shpwrck/openshift-102-tools
+    # Defaults to the showroom image tag (values.image.tag) or chart appVersion when empty.
+    tag: ""
+    pullPolicy: IfNotPresent
+  podAnnotations: {}
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi

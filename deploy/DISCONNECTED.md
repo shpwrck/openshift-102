@@ -28,7 +28,8 @@ oc image mirror --keep-manifest-list=true \
 ```
 
 Replace `OWNER`, `TAG`, and `registry.example.com/...` with your values. The
-runtime image is the only image required to run the Helm chart.
+Helm chart pulls the **showroom** image and, by default, the **CLI tools** image
+(`tools.enabled: true`). Mirror both if you use the bundled tools pod.
 
 ## 2. Install with Helm
 
@@ -36,10 +37,13 @@ runtime image is the only image required to run the Helm chart.
 helm upgrade --install openshift-102 ./openshift-102-workshop-HELM_SEMVER.tgz \
   --namespace workshop --create-namespace \
   --set image.repository=registry.example.com/workshop/openshift-102 \
-  --set image.tag=TAG
+  --set image.tag=TAG \
+  --set tools.image.repository=registry.example.com/workshop/openshift-102-tools \
+  --set tools.image.tag=TAG
 ```
 
 Set `route.enabled=false` if you are not on OpenShift or do not want a `Route`.
+Set `tools.enabled=false` if you do not want the CLI tools `Deployment` in the release namespace.
 
 ## 3. Optional: serve static files only
 

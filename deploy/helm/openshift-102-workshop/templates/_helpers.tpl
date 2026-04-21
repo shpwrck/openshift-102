@@ -18,3 +18,12 @@
 {{- $tag := .Values.image.tag | default .Chart.AppVersion }}
 {{- printf "%s:%s" .Values.image.repository $tag }}
 {{- end }}
+
+{{- define "workshop.toolsFullname" -}}
+{{- printf "%s-tools" (include "workshop.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "workshop.toolsImage" -}}
+{{- $tag := .Values.tools.image.tag | default (.Values.image.tag | default .Chart.AppVersion) }}
+{{- printf "%s:%s" .Values.tools.image.repository $tag }}
+{{- end }}
