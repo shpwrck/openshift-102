@@ -24,6 +24,15 @@ utilities/lab-serve
 
 Open http://localhost:8080/index.html .
 
+The generated site substitutes default image coordinates for the xref:master@openshift-102:ROOT:cli-tools.adoc[shared CLI tools] callout (`tools-image-basename` / `tools-image-tag` in `default-site.yml`). Point them at your registry when building disconnected documentation, for example:
+
+[source,bash]
+----
+antora generate default-site.yml --stacktrace \
+  --attribute tools-image-basename=ghcr.io/myorg/openshift-102-tools \
+  --attribute tools-image-tag=v1.0.0
+----
+
 If you already cloned without submodules:
 
 [source,bash]

@@ -1,0 +1,21 @@
+// Shared across showroom home, cli-tools page, and bundled workshop index pages.
+// Image coordinates come from the Antora playbook (default-site.yml); override at
+// build time with: antora generate default-site.yml --attribute tools-image-basename=...
+
+.Shared CLI tools image (OpenShift 102 showroom)
+
+If you prefer not to install `oc`, `kubectl`, `helm`, `istioctl`, and related tools on your laptop, run a short-lived pod on the cluster that ships the same CLIs as this documentation release.
+
+Default image (change the tag to match your deployed showroom chart or offline bundle):
+
+`{tools-image-basename}:{tools-image-tag}`
+
+[source,bash]
+----
+TOOLS_IMAGE="{tools-image-basename}:{tools-image-tag}"
+oc run workshop-tools -it --rm --restart=Never \
+  --image="$TOOLS_IMAGE" \
+  --command -- bash
+----
+
+The image includes a small `docker` CLI shim for Helm OCI exercises (no Docker Engine). For disconnected clusters, mirror the tools image and UBI base listed in the release tarball `TOOLS.md` and `images-mirror.txt`.

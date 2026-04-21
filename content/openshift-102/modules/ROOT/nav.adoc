@@ -1,4 +1,5 @@
 * xref:index.adoc[Workshop home]
+* xref:cli-tools.adoc[Shared CLI tools]
 * Included workshops
  ** xref:master@helm-workshop:ROOT:index.adoc[Helm Workshop]
  ** xref:master@deploy-workshop:ROOT:index.adoc[Advanced deployment workshop]

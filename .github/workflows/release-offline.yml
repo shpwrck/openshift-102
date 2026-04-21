@@ -70,7 +70,13 @@ jobs:
         run: npm install --global @antora/cli@3.1 @antora/site-generator@3.1
 
       - name: Build static site
-        run: antora generate default-site.yml --stacktrace
+        env:
+          TOOLS_IMAGE_BASE: ${{ steps.img.outputs.repository }}-tools
+          TOOLS_IMAGE_TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          antora generate default-site.yml --stacktrace \
+            --attribute tools-image-basename="$TOOLS_IMAGE_BASE" \
+            --attribute tools-image-tag="$TOOLS_IMAGE_TAG"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

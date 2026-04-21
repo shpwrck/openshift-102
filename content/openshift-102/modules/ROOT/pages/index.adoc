@@ -14,6 +14,8 @@ Upstream sources (same layout as each standalone workshop):
 * https://github.com/shpwrck/istio-workshop
 * https://github.com/shpwrck/prometheus-workshop
 
+include::partial$cli-tools-container.adoc[]
+
 == Local build
 
 Clone with submodules, then generate the site:

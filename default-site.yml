@@ -4,6 +4,14 @@ site:
   url: "https://example.com"
   start_page: master@openshift-102:ROOT:index.adoc
 
+asciidoc:
+  attributes:
+    # Set only in this showroom playbook so bundled workshop sources stay buildable standalone.
+    openshift-102-showroom: true
+    # Workshop tools image (Dockerfile.tools); override when building for another registry or tag.
+    tools-image-basename: ghcr.io/shpwrck/openshift-102-tools
+    tools-image-tag: latest
+
 content:
   sources:
     - url: .
