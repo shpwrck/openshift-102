@@ -1,0 +1,12 @@
+name: istio-workshop
+title: Istio Service Mesh Workshop
+version: master
+nav:
+  - modules/ROOT/nav.adoc
+
+asciidoc:
+  attributes:
+    lab_name: "Istio Service Mesh Workshop"
+    release-version: master
+    page-pagination: true
+    page-links: []

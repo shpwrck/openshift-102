@@ -1,0 +1,6 @@
+* xref:index.adoc[Workshop home]
+* Included workshops
+ ** xref:master@helm-workshop:ROOT:index.adoc[Helm Workshop]
+ ** xref:master@deploy-workshop:ROOT:index.adoc[Advanced deployment workshop]
+ ** xref:master@istio-workshop:ROOT:index.adoc[Istio service mesh workshop]
+ ** xref:master@prometheus-workshop:ROOT:index.adoc[Prometheus query workshop]

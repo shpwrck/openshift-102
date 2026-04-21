@@ -1,0 +1,12 @@
+name: prometheus-workshop
+title: Prometheus Query Workshop
+version: master
+nav:
+  - modules/ROOT/nav.adoc
+
+asciidoc:
+  attributes:
+    lab_name: "Prometheus Query Workshop"
+    release-version: master
+    page-pagination: true
+    page-links: []

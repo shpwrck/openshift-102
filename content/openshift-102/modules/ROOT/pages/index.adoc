@@ -1,0 +1,30 @@
+= OpenShift 102 Workshop
+
+This site bundles the following hands-on workshops into one Antora showroom:
+
+* xref:master@helm-workshop:ROOT:index.adoc[Helm Workshop] — Helm charts, templating, and packaging.
+* xref:master@deploy-workshop:ROOT:index.adoc[Advanced deployment workshop] — progressive delivery and related deployment topics.
+* xref:master@istio-workshop:ROOT:index.adoc[Istio service mesh workshop] — traffic management with Istio.
+* xref:master@prometheus-workshop:ROOT:index.adoc[Prometheus query workshop] — PromQL and observability basics.
+
+Upstream sources (same layout as each standalone workshop):
+
+* https://github.com/shpwrck/helm-workshop
+* https://github.com/shpwrck/deploy-workshop
+* https://github.com/shpwrck/istio-workshop
+* https://github.com/shpwrck/prometheus-workshop
+
+== Local build
+
+Clone with submodules, then generate the site:
+
+[source,bash]
+----
+git clone --recurse-submodules <your-fork-or-repo-url>
+cd openshift-102
+./scripts/verify-submodules.sh
+utilities/lab-build
+utilities/lab-serve
+----
+
+Browse to http://localhost:8080/index.html and use the left nav to switch between workshops.

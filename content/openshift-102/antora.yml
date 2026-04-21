@@ -1,0 +1,12 @@
+name: openshift-102
+title: OpenShift 102 Workshop
+version: master
+nav:
+  - modules/ROOT/nav.adoc
+
+asciidoc:
+  attributes:
+    lab_name: "OpenShift 102 Workshop"
+    release-version: master
+    page-pagination: true
+    page-links: []
