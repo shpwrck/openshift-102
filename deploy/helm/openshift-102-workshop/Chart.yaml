@@ -1,0 +1,12 @@
+apiVersion: v2
+name: openshift-102-workshop
+description: Static OpenShift 102 workshop (Antora showroom) served over HTTP
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - openshift
+  - workshop
+  - antora
+maintainers:
+  - name: maintainers

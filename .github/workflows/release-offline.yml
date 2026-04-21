@@ -1,0 +1,166 @@
+name: Release disconnected OpenShift bundle
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: "Release tag (semver vX.Y.Z or vX.Y.Z-prerelease), e.g. v1.0.0"
+        required: true
+        default: v0.0.1
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: release-offline-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Resolve version tag
+        id: ver
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.version_tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          HVER="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "helm_semver=$HVER" >> "$GITHUB_OUTPUT"
+          if ! echo "$HVER" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+            echo "::error::Tag must look like vX.Y.Z (Helm semver after stripping v). Got: $TAG"
+            exit 1
+          fi
+
+      - name: Image coordinates (GHCR, lowercase)
+        id: img
+        run: |
+          set -euo pipefail
+          LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')
+          echo "repository=ghcr.io/${LOWER}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify workshop submodules
+        run: ./scripts/verify-submodules.sh
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.13.1
+
+      - name: Install Antora
+        run: npm install --global @antora/cli@3.1 @antora/site-generator@3.1
+
+      - name: Build static site
+        run: antora generate default-site.yml --stacktrace
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push runtime image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.runtime
+          push: true
+          tags: |
+            ${{ steps.img.outputs.repository }}:${{ steps.ver.outputs.tag }}
+            ${{ steps.img.outputs.repository }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Install Syft
+        run: curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.19.0
+
+      - name: Pull image for SBOM scan
+        run: |
+          set -euo pipefail
+          docker pull "${{ steps.img.outputs.repository }}@${{ steps.push.outputs.digest }}"
+
+      - name: Generate SBOM (CycloneDX) from pushed image
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          DIGEST='${{ steps.push.outputs.digest }}'
+          REPO='${{ steps.img.outputs.repository }}'
+          test -n "$DIGEST"
+          syft scan "docker://${REPO}@${DIGEST}" -o "cyclonedx-json=openshift-102-${TAG}.sbom.cdx.json"
+          ls -la "openshift-102-${TAG}.sbom.cdx.json"
+
+      - name: Helm lint
+        run: helm lint deploy/helm/openshift-102-workshop
+
+      - name: Package Helm chart
+        id: helm
+        run: |
+          set -euo pipefail
+          H='${{ steps.ver.outputs.helm_semver }}'
+          helm package deploy/helm/openshift-102-workshop \
+            --version "$H" \
+            --app-version '${{ steps.ver.outputs.tag }}'
+          CHART_TGZ="openshift-102-workshop-${H}.tgz"
+          test -f "$CHART_TGZ"
+          echo "package=$CHART_TGZ" >> "$GITHUB_OUTPUT"
+
+      - name: Assemble offline tarball
+        run: |
+          set -euxo pipefail
+          TAG="${{ steps.ver.outputs.tag }}"
+          CHART_TGZ="${{ steps.helm.outputs.package }}"
+          REPO="${{ steps.img.outputs.repository }}"
+          BUNDLE="${GITHUB_WORKSPACE}/openshift-102-offline-${TAG}.tar.gz"
+          STAGING=$(mktemp -d)
+          mkdir -p "${STAGING}/www"
+          cp -a www/. "${STAGING}/www/"
+          cp "${CHART_TGZ}" "${STAGING}/"
+          cp deploy/DISCONNECTED.md "${STAGING}/"
+          {
+            echo "# Primary runtime image (required on the cluster)"
+            echo "${REPO}:${TAG}"
+            echo "# Build-time bases (optional; only if rebuilding the image)"
+            echo "docker.io/antora/antora:3.1.7"
+            echo "registry.access.redhat.com/ubi9/httpd-24:1-301"
+          } > "${STAGING}/images-mirror.txt"
+          ( cd "${STAGING}" && tar -czf "${BUNDLE}" . )
+          ls -la "${BUNDLE}"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: OpenShift 102 disconnected bundle ${{ steps.ver.outputs.tag }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.helm.outputs.package }}
+            openshift-102-${{ steps.ver.outputs.tag }}.sbom.cdx.json
+            openshift-102-offline-${{ steps.ver.outputs.tag }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

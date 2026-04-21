@@ -46,3 +46,11 @@ One-time: turn Pages on for this repository and choose **GitHub Actions** as the
 
 * In the GitHub UI: **Settings** → **Pages** → **Build and deployment** → **Source** → **GitHub Actions**.
 * Or from a machine with the https://cli.github.com/[`gh`] CLI: `gh auth login` then `./scripts/enable-github-pages.sh` (see `scripts/enable-github-pages.sh --help`).
+
+== Disconnected OpenShift (air-gap)
+
+* **Helm chart:** `deploy/helm/openshift-102-workshop` — deploys the pre-built static site using the UBI httpd runtime image (see `Dockerfile.runtime`).
+* **SBOM:** CycloneDX JSON is produced in CI for the pushed runtime image (see `.github/workflows/release-offline.yml`).
+* **Release:** Push a SemVer tag `v*` (for example `v1.0.0`) or run the **Release disconnected OpenShift bundle** workflow manually. Each release publishes the Helm package, an offline tarball (`www/` + chart + `DISCONNECTED.md` + `images-mirror.txt`), the SBOM, and pushes the runtime image to `ghcr.io/<owner>/openshift-102:<tag>`.
+
+Details: `deploy/DISCONNECTED.md`.

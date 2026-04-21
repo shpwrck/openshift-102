@@ -1,0 +1,45 @@
+replicaCount: 1
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  # Override to your mirrored registry in disconnected environments.
+  # Release workflow pushes to ghcr.io/<owner>/openshift-102:<tag>
+  repository: ghcr.io/shpwrck/openshift-102
+  # Defaults to chart appVersion when empty.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+service:
+  type: ClusterIP
+  port: 8080
+
+route:
+  enabled: true
+  # edge, passthrough, reencrypt
+  termination: edge
+  host: ""
+
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false

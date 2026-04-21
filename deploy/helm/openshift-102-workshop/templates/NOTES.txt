@@ -1,0 +1,18 @@
+OpenShift 102 workshop (static Antora site) has been deployed.
+
+1. Get the application URL:
+{{- if and .Values.route.enabled (.Capabilities.APIVersions.Has "route.openshift.io/v1") }}
+   oc get route {{ include "workshop.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.spec.host}{"\n"}'
+{{- else }}
+   oc get svc {{ include "workshop.fullname" . }} -n {{ .Release.Namespace }}
+   Use port-forward: oc port-forward svc/{{ include "workshop.fullname" . }} 8080:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+{{- end }}
+
+2. Open /index.html for the workshop home.
+
+For disconnected installs, mirror the container image from the release bundle
+or GHCR into your registry and set:
+
+  image.repository / image.tag
+
+See DISCONNECTED.md in the offline release archive.

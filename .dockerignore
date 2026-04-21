@@ -1,0 +1,13 @@
+# Keep build context small; Antora only needs playbook + content + workshops.
+.git
+.github
+www
+.cache
+vendor/bundle
+node_modules
+build
+**/.DS_Store
+*.log
+*.tmp
+.env
+.env.*
