@@ -1,5 +1,5 @@
 # Keep build context small; Antora only needs playbook + content + workshops.
-.git
+# NOTE: Do not exclude .git — Antora requires a git worktree for url: . sources.
 .github
 www
 .cache
