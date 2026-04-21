@@ -39,25 +39,16 @@ spec:
       labels:
         app.kubernetes.io/name: openshift-102-workshop-tools
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        seccompProfile:
-          type: RuntimeDefault
       containers:
         - name: tools
           image: "{tools-image-basename}:{tools-image-tag}"
           imagePullPolicy: IfNotPresent
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsUser: 1001
-            capabilities:
-              drop: ["ALL"]
           resources:
             requests:
               cpu: 50m
               memory: 128Mi
             limits:
+              cpu: "1"
               memory: 512Mi
 ----
 

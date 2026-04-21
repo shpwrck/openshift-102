@@ -25,24 +25,15 @@ spec:
       labels:
         app.kubernetes.io/name: openshift-102-workshop-tools
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        seccompProfile:
-          type: RuntimeDefault
       containers:
         - name: tools
           # Replace with your mirror or pinned tag (e.g. ghcr.io/<org>/openshift-102-tools:v1.0.5)
           image: ghcr.io/shpwrck/openshift-102-tools:latest
           imagePullPolicy: IfNotPresent
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsUser: 1001
-            capabilities:
-              drop: ["ALL"]
           resources:
             requests:
               cpu: 50m
               memory: 128Mi
             limits:
+              cpu: "1"
               memory: 512Mi
