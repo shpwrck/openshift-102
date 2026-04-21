@@ -197,6 +197,7 @@ jobs:
           cp "${CHART_TGZ}" "${STAGING}/"
           cp deploy/DISCONNECTED.md "${STAGING}/"
           cp deploy/TOOLS.md "${STAGING}/"
+          cp deploy/openshift-102-tools-deployment.yaml "${STAGING}/"
           {
             echo "# Primary runtime image (Antora showroom)"
             echo "${REPO}:${TAG}"

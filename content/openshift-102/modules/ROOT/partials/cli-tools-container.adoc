@@ -4,18 +4,61 @@
 
 .Shared CLI tools image (OpenShift 102 showroom)
 
-If you prefer not to install `oc`, `kubectl`, `helm`, `istioctl`, and related tools on your laptop, run a short-lived pod on the cluster that ships the same CLIs as this documentation release. An interactive `bash` (`oc exec -it … bash`) prints a short list of bundled tools when the shell starts.
+If you prefer not to install `oc`, `kubectl`, `helm`, `istioctl`, and related tools on your laptop, run the **workshop CLI tools** image on the cluster. You do **not** need a local `oc` client: apply the manifest from the web console (see below). An interactive `bash` session prints a short list of bundled tools when the shell starts (for example after opening **Terminal** on the pod and running `bash` or `bash -l` if the default shell is `sh`).
 
 Default image (change the tag to match your deployed showroom chart or offline bundle):
 
 `{tools-image-basename}:{tools-image-tag}`
 
-[source,bash]
+To apply the workload without a local `oc` client:
+
+. In the OpenShift console, select your **Project**.
+. Click **+** in the top bar, then **Import YAML**.
+. Paste the manifest below, adjust the `image:` line if you mirror images, then click **Create**.
+. Go to **Workloads → Deployments → openshift-102-workshop-tools**, open the **Pods** tab, select the running pod, then **Terminal** (or **Actions → Debug pod**). Run `bash` or `bash -l` if you need the interactive bash banner.
+
+The same manifest lives in the repository as `deploy/openshift-102-tools-deployment.yaml` and is shipped in the offline release tarball.
+
+[source,yaml,subs=attributes+]
 ----
-TOOLS_IMAGE="{tools-image-basename}:{tools-image-tag}"
-oc run workshop-tools -it --rm --restart=Never \
-  --image="$TOOLS_IMAGE" \
-  --command -- bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openshift-102-workshop-tools
+  labels:
+    app.kubernetes.io/name: openshift-102-workshop-tools
+    app.kubernetes.io/part-of: openshift-102-workshop
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openshift-102-workshop-tools
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openshift-102-workshop-tools
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: tools
+          image: "{tools-image-basename}:{tools-image-tag}"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 1001
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
 ----
 
-The image includes a small `docker` CLI shim for Helm OCI exercises (no Docker Engine); manifest operations use `skopeo` under the hood. For disconnected clusters, mirror the tools image and UBI base listed in the release tarball `TOOLS.md` and `images-mirror.txt`.
+The container image `CMD` keeps the process alive (`sleep` via the image entrypoint) so the pod stays running until you delete the Deployment. The image includes a small `docker` CLI shim for Helm OCI exercises (no Docker Engine); manifest operations use `skopeo` under the hood. For disconnected clusters, mirror the tools image and UBI base listed in the release tarball `TOOLS.md` and `images-mirror.txt`.

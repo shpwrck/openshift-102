@@ -1,11 +1,21 @@
 # Workshop CLI tools image
 
 The image built from `Dockerfile.tools` (published as `ghcr.io/<owner>/openshift-102-tools:<tag>`)
-is meant for **per-user terminals** (for example `oc run ... --rm -it --image=... bash`) so every
-learner has the same CLIs without installing them on a laptop.
+gives every learner the same CLIs **without** installing `oc`, Helm, or other tools on a laptop—and
+**without** requiring a local `oc` binary at all.
 
-On an **interactive** `bash` session (`oc exec -it … bash` or `bash -il`), the default `~/.bashrc`
-prints a short reminder of which tools are installed.
+## Deploy from the OpenShift web console (recommended)
+
+1. In the console, open your **Project**.
+2. Click **+** → **Import YAML**.
+3. Paste the contents of **`openshift-102-tools-deployment.yaml`** (from this repo under `deploy/`,
+   or from the root of the offline release tarball), edit the `image:` line if you use a mirror or a
+   specific tag, then **Create**.
+4. Go to **Workloads → Deployments → openshift-102-workshop-tools** → **Pods** → your pod → **Terminal**.
+   If the terminal starts `sh`, run **`bash`** or **`bash -l`** for an interactive bash session; the
+   image’s `~/.bashrc` prints a short reminder of installed tools.
+
+The Deployment keeps one replica running; the image entrypoint sleeps until you delete the workload.
 
 ## Included tools
 
@@ -28,7 +38,9 @@ There is **no Docker Engine** in the image. `/usr/local/bin/docker` is a small s
 
 For anything beyond that, use `skopeo` or `podman` on a host with a real engine.
 
-## Example pod on OpenShift
+## Optional: one-off pod with `oc` on your workstation
+
+If you already have `oc` installed locally:
 
 ```bash
 oc run workshop-tools -it --rm --restart=Never \
