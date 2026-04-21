@@ -66,10 +66,26 @@ podman-compose up --build
 
 The workflow in `.github/workflows/gh-pages.yml` publishes the `www/` output from `antora generate default-site.yml` using the same approach as the upstream workshop repositories.
 
+Each run also packages the Helm chart under **`helm/`** on the same site and writes **`helm/index.yaml`**, so GitHub Pages doubles as a **live Helm chart repository** (no OCI needed for `helm repo add`).
+
 One-time: turn Pages on for this repository and choose **GitHub Actions** as the build source.
 
 * In the GitHub UI: **Settings** → **Pages** → **Build and deployment** → **Source** → **GitHub Actions**.
 * Or from a machine with the https://cli.github.com/[`gh`] CLI: `gh auth login` then `./scripts/enable-github-pages.sh` (see `scripts/enable-github-pages.sh --help`).
+
+With Pages enabled for your fork, replace `OWNER` and `REPO` with your GitHub `owner` and repository name (lowercase in the URL):
+
+[source,bash]
+----
+helm repo add openshift-102-ghpages https://OWNER.github.io/REPO/helm
+helm repo update
+helm search repo openshift-102-ghpages
+helm install my-workshop openshift-102-ghpages/openshift-102-workshop \
+  --set image.tag=latest \
+  --set image.repository=ghcr.io/OWNER/openshift-102
+----
+
+The chart version published from `main` is **`0.1.<GitHub Actions run number>`** so each successful workflow produces a fresh index entry. Set `image.repository` / `image.tag` to the GHCR coordinates you run (for example a release tag of the showroom image).
 
 == Disconnected OpenShift (air-gap)
 
