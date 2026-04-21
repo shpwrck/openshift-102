@@ -18,4 +18,4 @@ oc run workshop-tools -it --rm --restart=Never \
   --command -- bash
 ----
 
-The image includes a small `docker` CLI shim for Helm OCI exercises (no Docker Engine). For disconnected clusters, mirror the tools image and UBI base listed in the release tarball `TOOLS.md` and `images-mirror.txt`.
+The image includes a small `docker` CLI shim for Helm OCI exercises (no Docker Engine); manifest operations use `skopeo` under the hood. For disconnected clusters, mirror the tools image and UBI base listed in the release tarball `TOOLS.md` and `images-mirror.txt`.

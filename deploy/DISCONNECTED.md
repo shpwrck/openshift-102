@@ -13,7 +13,7 @@ as static files under `www/`.
 | `openshift-102-<tag>.sbom.cdx.json` | CycloneDX SBOM for the **showroom runtime** image |
 | `openshift-102-tools-<tag>.sbom.cdx.json` | CycloneDX SBOM for the **CLI tools** image (`openshift-102-tools`) |
 | `ghcr.io/<owner>/openshift-102:<tag>` | Serves the pre-built site (no Antora at runtime) |
-| `ghcr.io/<owner>/openshift-102-tools:<tag>` | Shared `oc` / `helm` / `istioctl` / `kubectl` / helpers (see `TOOLS.md`) |
+| `ghcr.io/<owner>/openshift-102-tools:<tag>` | Shared `oc` / `helm` / `istioctl` / `kubectl`, `skopeo`, and a `docker` CLI shim (see `TOOLS.md`) |
 
 ## 1. Mirror images into your registry
 

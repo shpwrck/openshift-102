@@ -11,6 +11,19 @@ Antora showroom site that bundles the Helm, advanced deployment, Istio, and Prom
 
 This repository vendors them as Git submodules under `workshops/` and exposes each as its own Antora component (see `content/bundled/*/antora.yml`) so they can coexist in a single generated site.
 
+== Workshop CLI tools image
+
+Releases also publish **`ghcr.io/<owner>/openshift-102-tools:<tag>`** (`Dockerfile.tools`): a UBI-based image learners can run as a pod (`oc run … bash`) so everyone shares the same CLIs without local installs.
+
+Included in that image:
+
+* `oc` and `kubectl` (OpenShift stable client mirror)
+* `helm` (pinned release) and `istioctl` (aligned with the Istio 1.23 workshop)
+* `curl`, `jq`, `git`, GnuPG (`gnupg2`), `skopeo`
+* `/usr/local/bin/docker` — a **shim** only (no Docker Engine): `manifest inspect` uses `skopeo inspect --raw`; `pull` / `image inspect` / `history` use `skopeo` (and `jq` where needed)
+
+Smoke checks: `bash scripts/verify-tools-image.sh IMAGE:TAG` (also run in CI on release). Offline layout and mirroring notes: `deploy/TOOLS.md`.
+
 == Clone and build
 
 [source,bash]
@@ -30,7 +43,7 @@ The generated site substitutes default image coordinates for the **Shared CLI to
 ----
 antora generate default-site.yml --stacktrace \
   --attribute tools-image-basename=ghcr.io/myorg/openshift-102-tools \
-  --attribute tools-image-tag=v1.0.0
+  --attribute tools-image-tag=v1.0.4
 ----
 
 If you already cloned without submodules:
@@ -60,6 +73,6 @@ One-time: turn Pages on for this repository and choose **GitHub Actions** as the
 
 * **Helm chart:** `deploy/helm/openshift-102-workshop` — deploys the pre-built static site using the UBI httpd runtime image (see `Dockerfile.runtime`).
 * **SBOM:** CycloneDX JSON is produced in CI for the pushed runtime image (see `.github/workflows/release-offline.yml`).
-* **Release:** Push a SemVer tag `v*` (for example `v1.0.0`) or run the **Release disconnected OpenShift bundle** workflow manually. Each release publishes the Helm package, an offline tarball (`www/` + chart + `DISCONNECTED.md` + `TOOLS.md` + `images-mirror.txt`), SBOMs for the **site** and **CLI tools** images, and pushes `ghcr.io/<owner>/openshift-102:<tag>` (showroom) plus `ghcr.io/<owner>/openshift-102-tools:<tag>` (shared workshop CLIs).
+* **Release:** Push a SemVer tag `v*` (for example `v1.0.4`) or run the **Release disconnected OpenShift bundle** workflow manually. Each release publishes the Helm package, an offline tarball (`www/` + chart + `DISCONNECTED.md` + `TOOLS.md` + `images-mirror.txt`), CycloneDX SBOMs for the **showroom** and **CLI tools** images, and pushes `ghcr.io/<owner>/openshift-102:<tag>` and `ghcr.io/<owner>/openshift-102-tools:<tag>`.
 
 Details: `deploy/DISCONNECTED.md`, `deploy/TOOLS.md`.

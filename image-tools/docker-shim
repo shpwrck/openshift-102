@@ -12,12 +12,19 @@ usage() {
   exit 1
 }
 
+# Accept bare names (e.g. alpine:latest) or full docker:// URIs for skopeo.
+docker_uri() {
+  local r=${1:?}
+  [[ "$r" == docker://* ]] && printf '%s\n' "$r" && return
+  printf 'docker://%s\n' "$r"
+}
+
 case "$cmd" in
   manifest)
     case "$sub" in
       inspect)
         [[ -n "${ref:-}" ]] || usage
-        exec crane manifest "$ref"
+        exec skopeo inspect --raw "$(docker_uri "$ref")"
         ;;
     esac
     ;;

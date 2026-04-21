@@ -6,7 +6,6 @@ FROM registry.access.redhat.com/ubi9/ubi:latest
 ARG TARGETARCH=amd64
 ARG HELM_VERSION=3.16.3
 ARG ISTIO_VERSION=1.23.0
-ARG CRANE_VERSION=0.20.3
 
 USER 0
 
@@ -48,18 +47,6 @@ RUN set -eux; \
       | tar -xz -C /tmp; \
     install -m0755 "/tmp/istio-${ISTIO_VERSION}/bin/istioctl" /usr/local/bin/istioctl; \
     rm -rf "/tmp/istio-${ISTIO_VERSION}"
-
-# crane (registry / manifest operations for the docker shim)
-RUN set -eux; \
-    case "${TARGETARCH}" in \
-      amd64) carch=x86_64 ;; \
-      arm64) carch=arm64 ;; \
-      *) exit 1 ;; \
-    esac; \
-    curl -sSL "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_${carch}.tar.gz" \
-      | tar -xz -C /tmp crane; \
-    install -m0755 /tmp/crane /usr/local/bin/crane; \
-    rm -f /tmp/crane
 
 COPY image-tools/docker-shim /usr/local/bin/docker
 RUN chmod 0755 /usr/local/bin/docker

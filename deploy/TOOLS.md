@@ -12,19 +12,18 @@ learner has the same CLIs without installing them on a laptop.
 | `helm` | Helm workshop |
 | `istioctl` | Istio workshop (version matches Istio **1.23.x** lab text) |
 | `curl`, `jq`, `git`, `gpg` (`gnupg2`) | Prometheus, Helm signing exercises, general scripting |
-| `skopeo` | Registry copy / inspection |
-| `crane` | Manifest and registry helpers used by the `docker` shim |
+| `skopeo` | Registry copy / inspection; raw manifest for the `docker` shim |
 
 ## `docker` compatibility (Helm OCI lab)
 
 There is **no Docker Engine** in the image. `/usr/local/bin/docker` is a small shim that maps:
 
-* `docker manifest inspect` → `crane manifest`
+* `docker manifest inspect` → `skopeo inspect --raw`
 * `docker pull` → `skopeo copy` to a temporary `dir:` layout (prints the path)
 * `docker image inspect` → `skopeo inspect`
 * `docker history` → `skopeo inspect … \| jq` (layer metadata)
 
-For anything beyond that, use `skopeo`, `crane`, or `podman` on a host with a real engine.
+For anything beyond that, use `skopeo` or `podman` on a host with a real engine.
 
 ## Example pod on OpenShift
 

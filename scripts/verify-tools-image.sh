@@ -15,7 +15,6 @@ podman run --rm --entrypoint bash "$img" -c '
   jq --version
   curl --version | head -n 1
   skopeo --version
-  crane version
   echo "== docker shim (Helm OCI / registry exercises) =="
   docker manifest inspect alpine:latest | head -n 8
   echo "== done =="
