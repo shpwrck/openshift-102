@@ -1,0 +1,12 @@
+[submodule "workshops/helm-workshop"]
+	path = workshops/helm-workshop
+	url = https://github.com/shpwrck/helm-workshop.git
+[submodule "workshops/deploy-workshop"]
+	path = workshops/deploy-workshop
+	url = https://github.com/shpwrck/deploy-workshop.git
+[submodule "workshops/istio-workshop"]
+	path = workshops/istio-workshop
+	url = https://github.com/shpwrck/istio-workshop.git
+[submodule "workshops/prometheus-workshop"]
+	path = workshops/prometheus-workshop
+	url = https://github.com/shpwrck/prometheus-workshop.git

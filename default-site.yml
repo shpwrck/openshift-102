@@ -26,7 +26,7 @@ ui:
     - path: ./content/openshift-102/lib
     - path: .nojekyll
     - path: ui.yml
-    contents: "static_files: [ .nojekyll ]"
+      contents: "static_files: [ .nojekyll ]"
 
 runtime:
   cache_dir: ./.cache/antora
