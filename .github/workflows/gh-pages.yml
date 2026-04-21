@@ -1,4 +1,6 @@
 name: Publish to GitHub Pages
+# Tag pushes need the github-pages *environment* to allow refs/tags/v* (or all refs);
+# see README "GitHub Pages" → deployment rules. Otherwise tag deploys fail protection checks.
 on:
   workflow_dispatch:
   push:

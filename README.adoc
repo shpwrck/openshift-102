@@ -73,6 +73,16 @@ One-time: turn Pages on for this repository and choose **GitHub Actions** as the
 * In the GitHub UI: **Settings** → **Pages** → **Build and deployment** → **Source** → **GitHub Actions**.
 * Or from a machine with the https://cli.github.com/[`gh`] CLI: `gh auth login` then `./scripts/enable-github-pages.sh` (see `scripts/enable-github-pages.sh --help`).
 
+=== Allow `github-pages` deployments from release tags
+
+This workflow deploys on **`main`** and on **`v*`** tags so the Helm chart version can match a release (for example **`1.0.7`** for tag **`v1.0.7`**). GitHub attaches deployments to the **`github-pages`** https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment[environment], which can restrict which git refs may deploy.
+
+If a tag run fails with *Tag "v…" is not allowed to deploy to github-pages due to environment protection rules*:
+
+. Open **Settings** → **Environments** → **github-pages**.
+. Under **Deployment branches and tags**, add a rule that includes release tags, for example **Ref name** `refs/tags/v*` (or choose **All branches and tags** if that matches your security model).
+. Re-run the failed **Publish to GitHub Pages** workflow from the **Actions** tab (**Re-run all jobs**), or push a new commit or tag after saving the environment.
+
 With Pages enabled for your fork, replace `OWNER` and `REPO` with your GitHub `owner` and repository name (lowercase in the URL):
 
 [source,bash]
