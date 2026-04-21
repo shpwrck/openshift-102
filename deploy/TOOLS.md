@@ -4,6 +4,9 @@ The image built from `Dockerfile.tools` (published as `ghcr.io/<owner>/openshift
 is meant for **per-user terminals** (for example `oc run ... --rm -it --image=... bash`) so every
 learner has the same CLIs without installing them on a laptop.
 
+On an **interactive** `bash` session (`oc exec -it … bash` or `bash -il`), the default `~/.bashrc`
+prints a short reminder of which tools are installed.
+
 ## Included tools
 
 | Tool | Workshops |

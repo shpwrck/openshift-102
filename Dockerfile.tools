@@ -49,10 +49,16 @@ RUN set -eux; \
     rm -rf "/tmp/istio-${ISTIO_VERSION}"
 
 COPY image-tools/docker-shim /usr/local/bin/docker
-RUN chmod 0755 /usr/local/bin/docker
+COPY image-tools/workshop-tools-banner.sh /usr/local/share/openshift-102/workshop-tools-banner.sh
+
+RUN chmod 0755 /usr/local/bin/docker \
+    && chmod 0644 /usr/local/share/openshift-102/workshop-tools-banner.sh
 
 RUN useradd -u 1001 -r -g 0 -d /workshop -m -s /bin/bash workshop \
-    && mkdir -p /workshop && chown -R 1001:0 /workshop && chmod -R g=u /workshop
+    && mkdir -p /workshop && chown -R 1001:0 /workshop && chmod -R g=u /workshop \
+    && printf '\n# OpenShift 102 tools image — show bundled CLIs on interactive bash\n' >>/workshop/.bashrc \
+    && printf '. /usr/local/share/openshift-102/workshop-tools-banner.sh\n' >>/workshop/.bashrc \
+    && chown 1001:0 /workshop/.bashrc
 
 ENV HOME=/workshop
 WORKDIR /workshop

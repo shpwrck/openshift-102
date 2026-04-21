@@ -24,6 +24,8 @@ Included in that image:
 
 Smoke checks: `bash scripts/verify-tools-image.sh IMAGE:TAG` (also run in CI on release). Offline layout and mirroring notes: `deploy/TOOLS.md`.
 
+Interactive `bash` (`oc exec -it … bash`) sources `~/.bashrc`, which prints a one-time reminder of the bundled tools for this image.
+
 == Clone and build
 
 [source,bash]

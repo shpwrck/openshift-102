@@ -4,7 +4,7 @@
 
 .Shared CLI tools image (OpenShift 102 showroom)
 
-If you prefer not to install `oc`, `kubectl`, `helm`, `istioctl`, and related tools on your laptop, run a short-lived pod on the cluster that ships the same CLIs as this documentation release.
+If you prefer not to install `oc`, `kubectl`, `helm`, `istioctl`, and related tools on your laptop, run a short-lived pod on the cluster that ships the same CLIs as this documentation release. An interactive `bash` (`oc exec -it … bash`) prints a short list of bundled tools when the shell starts.
 
 Default image (change the tag to match your deployed showroom chart or offline bundle):
 
