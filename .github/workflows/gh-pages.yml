@@ -44,38 +44,17 @@ jobs:
           version: v3.14.4
       - name: antora generate
         run: antora generate default-site.yml --stacktrace
-      - name: package helm chart for static repo (GitHub Pages)
+      - name: package helm chart for static site (www/helm)
         env:
           GH_REF_TYPE: ${{ github.ref_type }}
           GH_REF_NAME: ${{ github.ref_name }}
           GH_RUN_NUMBER: ${{ github.run_number }}
         run: |
           set -euo pipefail
+          ./scripts/package-helm-into-www.sh .
           OWNER=$(echo '${{ github.repository }}' | cut -d/ -f1 | tr '[:upper:]' '[:lower:]')
           REPO=$(echo '${{ github.repository }}' | cut -d/ -f2 | tr '[:upper:]' '[:lower:]')
-          BASE_URL="https://${OWNER}.github.io/${REPO}/helm"
-          mkdir -p www/helm
-          rm -f www/helm/*.tgz www/helm/index.yaml
-          helm lint deploy/helm/openshift-102-workshop
-          # Chart semver matches Git release tag (v1.2.3 -> 1.2.3). Untagged main builds use latest v* tag +ci.<run> so each index entry stays unique.
-          if [ "${GH_REF_TYPE}" = "tag" ] && [[ "${GH_REF_NAME}" =~ ^v[0-9] ]]; then
-            CHART_VERSION="${GH_REF_NAME#v}"
-            APP_VERSION="${GH_REF_NAME}"
-          elif TAG=$(git describe --tags --abbrev=0 --match 'v*' HEAD 2>/dev/null); then
-            CHART_VERSION="${TAG#v}+ci.${GH_RUN_NUMBER}"
-            APP_VERSION="$(git describe --tags --always 2>/dev/null | head -c80 || echo snapshot)"
-          else
-            CHART_VERSION="0.0.1+ci.${GH_RUN_NUMBER}"
-            APP_VERSION="$(git describe --tags --always 2>/dev/null | head -c80 || echo snapshot)"
-          fi
-          echo "Helm chart version: ${CHART_VERSION} (appVersion: ${APP_VERSION})"
-          helm package deploy/helm/openshift-102-workshop \
-            --version "${CHART_VERSION}" \
-            --app-version "${APP_VERSION}"
-          mv openshift-102-workshop-*.tgz www/helm/
-          ( cd www/helm && helm repo index --url "${BASE_URL}" . )
-          echo "Helm repo base URL: ${BASE_URL}"
-          ls -la www/helm/
+          echo "Helm chart repo URL: https://${OWNER}.github.io/${REPO}/helm/ (add with: helm repo add ...)"
       - name: upload pages artifact
         uses: actions/upload-pages-artifact@v5
         with:

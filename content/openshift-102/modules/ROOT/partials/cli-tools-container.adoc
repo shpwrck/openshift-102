@@ -8,6 +8,8 @@ If you prefer not to install `oc`, `kubectl`, `helm`, `istioctl`, and related to
 
 The image build copies the **showroom Helm chart** into **`~/chart`** so you can run **`helm upgrade --install`** from the pod without cloning the git repository; use **`--set tools.enabled=false`** when installing from this pod so the chart does not start a second tools `Deployment`.
 
+The deployed showroom (HTTP image) also serves a static **Helm chart repository** at **`/helm/`** (for example, `https://<your-openshift-route>/helm/` with `index.yaml` and a packaged `openshift-102-workshop-*.tgz`). You can add it with `helm repo add` using that **HTTPS base URL** (trailing slash optional) and `helm search` / `helm install` from a workstation; no Git clone required for the chart.
+
 Default image (change the tag to match your deployed showroom chart or offline bundle):
 
 `{tools-image-basename}:{tools-image-tag}`

@@ -2,11 +2,41 @@
 # Build produces a self-contained HTTP image for disconnected clusters.
 # The Antora stage may reach the network in CI to resolve the UI bundle; the
 # runtime stage has no tooling and serves only pre-rendered files under /var/www/html.
+# A static Helm chart repository is also placed under /helm/ (www/helm in the build).
+
+FROM docker.io/library/alpine:3.20 AS helmfetch
+RUN apk add --no-cache curl && \
+  ARCH=$(uname -m) && \
+  case "$ARCH" in \
+  x86_64) HARCH=amd64 ;; \
+  aarch64) HARCH=arm64 ;; \
+  *) echo "package-helm-into-www: unsupported arch: $ARCH" >&2; exit 1 ;; \
+  esac && \
+  curl -fsSL "https://get.helm.sh/helm-v3.14.4-linux-${HARCH}.tar.gz" | tar xz -C /tmp && \
+  install -m 0755 "/tmp/linux-${HARCH}/helm" /usr/local/bin/helm
 
 FROM docker.io/antora/antora:3.1.7 AS builder
+# The packaging script and Antora’s git worktree use bash; the image is minimal.
+USER 0
+RUN (command -v bash >/dev/null 2>&1) || { \
+  (command -v apk >/dev/null 2>&1 && apk add --no-cache bash) || \
+  (command -v microdnf >/dev/null 2>&1 && microdnf install -y bash && microdnf clean all) || \
+  (command -v dnf >/dev/null 2>&1 && dnf install -y bash) || \
+  (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install -y bash) || true; } && \
+  command -v bash >/dev/null
+COPY --from=helmfetch /usr/local/bin/helm /usr/local/bin/helm
 WORKDIR /workspace
 COPY . .
+# Pass-through from `docker build --build-arg` (set by the release workflow for
+# a reproducible chart index version); when unset, scripts/package-helm-into-www.sh
+# uses git to derive versions.
+ARG HELM_CHART_VERSION=
+ARG HELM_APP_VERSION=
+ENV HELM_CHART_VERSION=${HELM_CHART_VERSION}
+ENV HELM_APP_VERSION=${HELM_APP_VERSION}
 RUN antora generate default-site.yml --stacktrace
+RUN chmod +x /workspace/scripts/package-helm-into-www.sh && \
+  /workspace/scripts/package-helm-into-www.sh /workspace
 
 FROM registry.access.redhat.com/ubi9/httpd-24:1-301
 USER 0
