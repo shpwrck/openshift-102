@@ -1,10 +1,17 @@
 ---
-# Deprecated: incomplete playbook (no bundled workshops). For PDF exports, use
-# `default-pdf-exports.yml` and `antora generate default-pdf-exports.yml` (see release workflow).
+# Release-only: same site as default-site.yml plus @antora/pdf-extension.
+# Produces static HTML and component PDFs under out-dir. Used by .github/workflows/release-offline.yml.
+# Not used by Dockerfile.runtime (keeps the runtime image free of Asciidoctor/PDF build artifacts).
 site:
   title: OpenShift 102 Workshop
   url: "https://example.com"
   start_page: master@openshift-102:ROOT:index.adoc
+
+asciidoc:
+  attributes:
+    openshift-102-showroom: true
+    tools-image-basename: ghcr.io/shpwrck/openshift-102-tools
+    tools-image-tag: latest
 
 content:
   sources:
@@ -35,9 +42,9 @@ runtime:
 
 antora:
   extensions:
-    - "@antora/pdf-extension"
     - require: ./content/openshift-102/lib/dev-mode.js
       enabled: false
+    - "@antora/pdf-extension"
 
 output:
-  dir: ./www
+  dir: ./www-pdf-exports
