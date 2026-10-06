@@ -1,0 +1,12 @@
+# Antora Assembler (@antora/pdf-extension 1.x) config for default-pdf-exports.yml.
+# Exports one PDF: the openshift-102 component, whose nav lib/pdf-bundle-nav.js extends with
+# every bundled workshop's pages.
+component_version_filter:
+  names: openshift-102
+assembly:
+  root_level: 0
+  attributes:
+    source-highlighter: rouge
+    outlinelevels: 3
+build:
+  command: bundle exec asciidoctor-pdf

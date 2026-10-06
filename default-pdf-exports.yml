@@ -1,6 +1,8 @@
 ---
-# Release-only: same site as default-site.yml plus @antora/pdf-extension.
-# Produces static HTML and component PDFs under out-dir. Used by .github/workflows/release-offline.yml.
+# Release-only: same content as default-site.yml plus @antora/pdf-extension.
+# Produces one PDF with the hub pages and all bundled workshops under
+# www-pdf-exports/openshift-102/_exports/ (see antora-assembler.yml and lib/pdf-bundle-nav.js).
+# Used by .github/workflows/release-offline.yml and test-pdf-build.yml.
 # Not used by Dockerfile.runtime (keeps the runtime image free of Asciidoctor/PDF build artifacts).
 site:
   title: OpenShift 102 Workshop
@@ -9,7 +11,8 @@ site:
 
 asciidoc:
   attributes:
-    openshift-102-showroom: true
+    # openshift-102-showroom is left unset so each workshop's start page omits its copy of the
+    # shared CLI tools snippet; the hub pages at the front of the PDF already include it.
     tools-image-basename: ghcr.io/shpwrck/openshift-102-tools
     tools-image-tag: latest
 
@@ -44,6 +47,8 @@ antora:
   extensions:
     - require: ./content/openshift-102/lib/dev-mode.js
       enabled: false
+    - require: ./lib/pdf-bundle-nav.js
+      component: openshift-102
     - "@antora/pdf-extension"
 
 output:

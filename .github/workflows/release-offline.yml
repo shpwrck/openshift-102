@@ -95,7 +95,12 @@ jobs:
           HELM_APP_VERSION: ${{ steps.ver.outputs.tag }}
         run: ./scripts/package-helm-into-www.sh .
 
-      - name: PDF exports (Antora 3.2 + Asciidoctor PDF)
+      - name: Set up Node.js for PDF export
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # @antora/pdf-extension 1.x requires Node.js >= 20.20
+
+      - name: PDF export, all workshops in one file (Antora 3.2 + Asciidoctor PDF)
         env:
           TOOLS_IMAGE_BASE: ${{ steps.img.outputs.repository }}-tools
           TOOLS_IMAGE_TAG: ${{ steps.ver.outputs.tag }}
@@ -106,19 +111,17 @@ jobs:
           mkdir -p "${ANTORA32_DIR}"
           cd "${ANTORA32_DIR}"
           npm init -y >/dev/null
-          npm install @antora/cli@3.2.0-alpha.11 @antora/site-generator@3.2.0-alpha.11 @antora/pdf-extension@1.0.0-beta.20
+          npm install @antora/cli@3.2 @antora/site-generator@3.2 @antora/pdf-extension@1.0.1
           export PATH="${ANTORA32_DIR}/node_modules/.bin:${PATH}"
           cd "${GITHUB_WORKSPACE}"
           antora generate default-pdf-exports.yml --stacktrace \
             --attribute tools-image-basename="${TOOLS_IMAGE_BASE}" \
             --attribute tools-image-tag="${TOOLS_IMAGE_TAG}"
-          test -d www-pdf-exports
           mapfile -d '' -t pdf_files < <(find www-pdf-exports -name "*.pdf" -type f -print0)
-          test "${#pdf_files[@]}" -ge 1
-          find www-pdf-exports -name "*.pdf" -type f
-          ( cd "${GITHUB_WORKSPACE}" && \
-            zip -9 "openshift-102-pdf-exports-${TAG}.zip" -- "${pdf_files[@]}" )
-          ls -la "openshift-102-pdf-exports-${TAG}.zip"
+          printf '%s\n' "${pdf_files[@]}"
+          test "${#pdf_files[@]}" -eq 1
+          cp "${pdf_files[0]}" "openshift-102-workshops-${TAG}.pdf"
+          ls -la "openshift-102-workshops-${TAG}.pdf"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -267,6 +270,6 @@ jobs:
             openshift-102-${{ steps.ver.outputs.tag }}.sbom.cdx.json
             openshift-102-tools-${{ steps.ver.outputs.tag }}.sbom.cdx.json
             openshift-102-offline-${{ steps.ver.outputs.tag }}.tar.gz
-            openshift-102-pdf-exports-${{ steps.ver.outputs.tag }}.zip
+            openshift-102-workshops-${{ steps.ver.outputs.tag }}.pdf
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

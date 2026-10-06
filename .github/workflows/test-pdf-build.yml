@@ -1,0 +1,59 @@
+name: Test PDF Build
+# Builds the combined workshop PDF (same playbook as the release) without publishing anything.
+
+on:
+  pull_request:
+    paths:
+      - "content/**"
+      - "workshops/**"
+      - "lib/**"
+      - "default-pdf-exports.yml"
+      - "antora-assembler.yml"
+      - "Gemfile"
+      - "Gemfile.lock"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Verify workshop submodules
+        run: ./scripts/verify-submodules.sh
+
+      - name: Set up Ruby (Asciidoctor PDF for @antora/pdf-extension)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # @antora/pdf-extension 1.x requires Node.js >= 20.20
+
+      - name: Install Antora and the PDF extension
+        run: npm install --global @antora/cli@3.2 @antora/site-generator@3.2 @antora/pdf-extension@1.0.1
+
+      - name: Build combined PDF
+        run: |
+          set -euo pipefail
+          antora generate default-pdf-exports.yml --stacktrace
+          mapfile -d '' -t pdf_files < <(find www-pdf-exports -name "*.pdf" -type f -print0)
+          printf '%s\n' "${pdf_files[@]}"
+          test "${#pdf_files[@]}" -eq 1
+          ls -la "${pdf_files[0]}"
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-pdf-build
+          path: www-pdf-exports/**/*.pdf
+          retention-days: 7
