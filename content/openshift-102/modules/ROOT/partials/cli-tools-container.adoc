@@ -56,4 +56,4 @@ spec:
               memory: 512Mi
 ----
 
-The container image `CMD` keeps the process alive (`sleep` via the image entrypoint) so the pod stays running until you delete the Deployment. The image includes a small `docker` CLI shim for Helm OCI exercises (no Docker Engine); manifest operations use `skopeo` under the hood. For disconnected clusters, mirror the tools image and UBI base listed in the release tarball `TOOLS.md` and `images-mirror.txt`.
+The container image `CMD` keeps the process alive (`sleep infinity`) so the pod stays running until you delete the Deployment. The image includes a small `docker` CLI shim for Helm OCI exercises (no Docker Engine); manifest operations use `skopeo` under the hood. For disconnected clusters, mirror the tools image listed in the release tarball `images-mirror.txt` (the UBI base image also listed in that file is only needed if you rebuild the tools image); see `TOOLS.md` for details.

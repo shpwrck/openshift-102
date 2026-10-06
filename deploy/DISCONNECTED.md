@@ -10,7 +10,7 @@ as static files under `www/`.
 | Artifact                                    | Purpose                                                                                                                                                                                                                                |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `openshift-102-offline-<tag>.tar.gz`        | Static `www/` tree, Helm chart `.tgz`, this file, `TOOLS.md`, `openshift-102-tools-deployment.yaml`, and `images-mirror.txt`                                                                                                           |
-| `openshift-102-pdf-exports-<tag>.zip`       | Component `index.pdf` files for each bundled workshop and the home component (from `default-pdf-exports.yml` / `@antora/pdf-extension`)                                                                                               |
+| `openshift-102-workshops-<tag>.pdf`         | Single PDF with the hub pages and all four bundled workshops (from `default-pdf-exports.yml` / `@antora/pdf-extension`)                                                                                                               |
 | `openshift-102-workshop-<semver>.tgz`       | Helm chart package                                                                                                                                                                                                                     |
 | `openshift-102-<tag>.sbom.cdx.json`         | CycloneDX SBOM for the **showroom runtime** image                                                                                                                                                                                      |
 | `openshift-102-tools-<tag>.sbom.cdx.json`   | CycloneDX SBOM for the **CLI tools** image (`openshift-102-tools`)                                                                                                                                                                     |
@@ -48,7 +48,8 @@ helm repo update
 helm show values openshift-102-workshop/openshift-102-workshop
 helm upgrade --install my-showroom openshift-102-workshop/openshift-102-workshop \
   -n workshop --create-namespace \
-  --set image.repository=registry.example.com/workshop/openshift-102 --set image.tag=TAG
+  --set image.repository=registry.example.com/workshop/openshift-102 --set image.tag=TAG \
+  --set tools.image.repository=registry.example.com/workshop/openshift-102-tools --set tools.image.tag=TAG
 ```
 
 `index.yaml` uses relative chart URLs so the same `www/helm` tree is valid
