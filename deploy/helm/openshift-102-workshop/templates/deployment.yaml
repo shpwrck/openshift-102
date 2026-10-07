@@ -19,6 +19,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "workshop.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: workshop
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
