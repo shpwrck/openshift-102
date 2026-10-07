@@ -25,10 +25,23 @@ At build time, **`Dockerfile.tools`** copies `deploy/helm/openshift-102-workshop
 - The chart is the **same commit** as the image build (not auto-updated after the image is built).
 - The **showroom** HTTP site includes a pre-built static Helm **repository** at **`/helm/`** (same package as the chart above); use the Route host with `helm repo add` if you prefer a chart repo to a file path in the tools pod.
 
-Example (from a Terminal on the tools pod, after `oc login` / in-cluster credentials work):
+Inside the pod, `oc` and `helm` act as the pod's `default` ServiceAccount, which has no permissions in
+the project (installs fail with `secrets is forbidden`). Before installing, either:
+
+- run `oc login` inside the pod as yourself (web console: your user name → **Copy login command**). If it
+  reports `certificate signed by unknown authority`, add
+  `--certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`, or
+- have a project admin grant the ServiceAccount `edit` on the project:
+  `oc create rolebinding workshop-tools-edit --clusterrole=edit --serviceaccount=my-project:default -n my-project`
+
+Install into an existing project (create it first in the console or with `oc new-project`). Do not add
+`--create-namespace`: it needs cluster-wide permission to create namespaces, which non-admin users and the
+ServiceAccount do not have on OpenShift, so the install fails with `forbidden` even when the namespace exists.
+
+Example (from a Terminal on the tools pod):
 
 ```bash
-helm upgrade --install my-showroom ~/chart -n my-namespace --create-namespace \
+helm upgrade --install my-showroom ~/chart -n my-project \
   --set image.repository=ghcr.io/OWNER/openshift-102 \
   --set image.tag=vX.Y.Z \
   --set tools.enabled=false
