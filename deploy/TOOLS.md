@@ -8,33 +8,46 @@ gives every learner the same CLIs **without** installing `oc`, Helm, or other to
 
 1. In the console, open your **Project**.
 2. Click **+** → **Import YAML**.
-3. Paste the contents of `**openshift-102-tools-deployment.yaml`** (from this repo under `deploy/`,
+3. Paste the contents of **`openshift-102-tools-deployment.yaml`** (from this repo under `deploy/`,
   or from the root of the offline release tarball), edit the `image:` line if you use a mirror or a
    specific tag, then **Create**.
 4. Go to **Workloads → Deployments → openshift-102-workshop-tools** → **Pods** → your pod → **Terminal**.
-  If the terminal starts `sh`, run `**bash`** or `**bash -l**` for an interactive bash session; the
+  If the terminal starts `sh`, run **`bash`** or **`bash -l`** for an interactive bash session; the
    image’s `~/.bashrc` prints a short reminder of installed tools.
 
-The Deployment keeps one replica running; the image entrypoint sleeps until you delete the workload.
+The Deployment keeps one replica running; the image `CMD` (`sleep infinity`) keeps it alive until you delete the workload.
 
 ## Helm chart baked into the tools image
 
-At build time, `**Dockerfile.tools**` copies `deploy/helm/openshift-102-workshop` into the image. Inside the pod:
+At build time, **`Dockerfile.tools`** copies `deploy/helm/openshift-102-workshop` into the image. Inside the pod:
 
-- Path: `**~/chart**` (symlink) or `**/usr/local/share/openshift-102/helm/openshift-102-workshop**`
+- Path: **`~/chart`** (symlink) or **`/usr/local/share/openshift-102/helm/openshift-102-workshop`**
 - The chart is the **same commit** as the image build (not auto-updated after the image is built).
-- The **showroom** HTTP site includes a pre-built static Helm **repository** at `**/helm/`** (same package as the chart above); use the Route host with `helm repo add` if you prefer a chart repo to a file path in the tools pod.
+- The **showroom** HTTP site includes a pre-built static Helm **repository** at **`/helm/`** (same package as the chart above); use the Route host with `helm repo add` if you prefer a chart repo to a file path in the tools pod.
 
-Example (from a Terminal on the tools pod, after `oc login` / in-cluster credentials work):
+Inside the pod, `oc` and `helm` act as the pod's `default` ServiceAccount, which has no permissions in
+the project (installs fail with `secrets is forbidden`). Before installing, either:
+
+- run `oc login` inside the pod as yourself (web console: your user name → **Copy login command**). If it
+  reports `certificate signed by unknown authority`, add
+  `--certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`, or
+- have a project admin grant the ServiceAccount `edit` on the project:
+  `oc create rolebinding workshop-tools-edit --clusterrole=edit --serviceaccount=my-project:default -n my-project`
+
+Install into an existing project (create it first in the console or with `oc new-project`). Do not add
+`--create-namespace`: it needs cluster-wide permission to create namespaces, which non-admin users and the
+ServiceAccount do not have on OpenShift, so the install fails with `forbidden` even when the namespace exists.
+
+Example (from a Terminal on the tools pod):
 
 ```bash
-helm upgrade --install my-showroom ~/chart -n my-namespace --create-namespace \
+helm upgrade --install my-showroom ~/chart -n my-project \
   --set image.repository=ghcr.io/OWNER/openshift-102 \
   --set image.tag=vX.Y.Z \
   --set tools.enabled=false
 ```
 
-Use `**--set tools.enabled=false**` when you are installing **from** the tools pod so the chart does not create a second tools `Deployment`. If you install the chart **elsewhere** (laptop CI, another pod) and want the bundled tools pod too, leave the default `**tools.enabled: true`** in `values.yaml`.
+Use **`--set tools.enabled=false`** when you are installing **from** the tools pod so the chart does not create a second tools `Deployment`. If you install the chart **elsewhere** (laptop, CI, another pod) and want the bundled tools pod too, leave the default **`tools.enabled: true`** in `values.yaml`.
 
 If you install the showroom with **Helm** from a normal workstation, the chart can still create the tools workload for you (`tools.enabled`, default **true**) so you do not need a separate paste-only manifest.
 
@@ -57,7 +70,7 @@ There is **no Docker Engine** in the image. `/usr/local/bin/docker` is a small s
 - `docker manifest inspect` → `skopeo inspect --raw`
 - `docker pull` → `skopeo copy` to a temporary `dir:` layout (prints the path)
 - `docker image inspect` → `skopeo inspect`
-- `docker history` → `skopeo inspect … \| jq` (layer metadata)
+- `docker history` → `skopeo inspect … | jq` (layer metadata)
 
 For anything beyond that, use `skopeo` or `podman` on a host with a real engine.
 

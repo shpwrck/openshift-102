@@ -11,8 +11,10 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   selector:
+    {{- /* The Deployment selector (immutable) also matches the tools pods; component keeps them out of the Service. */}}
     app.kubernetes.io/name: {{ include "workshop.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: workshop
   ports:
     - name: http
       port: {{ .Values.service.port }}

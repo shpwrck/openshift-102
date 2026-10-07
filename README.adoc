@@ -38,7 +38,7 @@ utilities/lab-build
 utilities/lab-serve
 ----
 
-Open http://localhost:8080/index.html .
+Open http://localhost:8080/index.html.
 
 The generated site substitutes default image coordinates for the **Shared CLI tools** page in the showroom (`tools-image-basename` / `tools-image-tag` in `default-site.yml`). Point them at your registry when building disconnected documentation, for example:
 
@@ -81,7 +81,7 @@ This workflow deploys on **`main`** and on **`v*`** tags so the Helm chart versi
 If a tag run fails with *Tag "v…" is not allowed to deploy to github-pages due to environment protection rules*:
 
 . Open **Settings** → **Environments** → **github-pages**.
-. Under **Deployment branches and tags**, add a rule that includes release tags, for example **Ref name** `refs/tags/v*` (or choose **All branches and tags** if that matches your security model).
+. Under **Deployment branches and tags**, choose **Selected branches and tags**, click **Add deployment branch or tag rule**, set **Ref type** to **Tag** and the name pattern to `v*` (or choose **No restriction** if that matches your security model).
 . Re-run the failed **Publish to GitHub Pages** workflow from the **Actions** tab (**Re-run all jobs**), or push a new commit or tag after saving the environment.
 
 With Pages enabled for your fork, replace `OWNER` and `REPO` with your GitHub `owner` and repository name (lowercase in the URL):
@@ -93,12 +93,13 @@ helm repo update
 helm search repo openshift-102-ghpages
 helm install my-workshop openshift-102-ghpages/openshift-102-workshop \
   --set image.tag=latest \
-  --set image.repository=ghcr.io/OWNER/openshift-102
+  --set image.repository=ghcr.io/OWNER/openshift-102 \
+  --set tools.image.repository=ghcr.io/OWNER/openshift-102-tools
 ----
 
 The chart defaults **`tools.enabled`** to **true**, which starts a second **Deployment** named like **`RELEASE-openshift-102-workshop-tools`** (Helm release name prefix) using **`ghcr.io/OWNER/openshift-102-tools`** with the same tag logic as the showroom image. Disable with **`--set tools.enabled=false`** if you only want the static site.
 
-The chart **version** follows the Git **release tag** when the workflow runs on a **`v*`** tag (for example tag `v1.0.6` yields chart version **`1.0.6`**). Builds on **`main`** between releases use the SemVer from the latest **`v*`** tag on that commit plus **`+ci.<run number>`** (for example **`1.0.6+ci.4821`**) so each Pages deploy gets a distinct chart while staying aligned with the last release line. Set `image.repository` / `image.tag` to your GHCR showroom image (often the same `v*` as the chart when you cut a release).
+The chart **version** follows the Git **release tag** when the workflow runs on a **`v*`** tag (for example tag `v1.0.6` yields chart version **`1.0.6`**). Builds on **`main`** between releases use the SemVer from the latest **`v*`** tag reachable from that commit plus **`+ci.<run number>`** (for example **`1.0.6+ci.4821`**) so each Pages deploy gets a distinct chart while staying aligned with the last release line. Set `image.repository` / `image.tag` to your GHCR showroom image (often the same `v*` as the chart when you cut a release).
 
 == Disconnected OpenShift (air-gap)
 
